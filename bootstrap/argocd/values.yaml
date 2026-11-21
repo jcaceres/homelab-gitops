@@ -1,0 +1,45 @@
+# ArgoCD Helm values — k3s-argo cluster (3 servers, kube-vip VIP 192.168.30.70).
+# Phase 2: NON-HA install. Phase 3 (HA drills) will switch to the HA values (redis-ha, replicas >= 2, controller sharding).
+# Chart: argo/argo-cd 10.17.2 (ArgoCD v3.6.1). Install script: ~/Scripts/argocd-install.sh
+global:
+  domain: argocd.home.arpa
+
+configs:
+  params:
+    # TLS terminates at Traefik (default self-signed cert); argocd-server speaks plain HTTP behind it.
+    server.insecure: true
+
+server:
+  ingress:
+    enabled: true
+    ingressClassName: traefik
+    hostname: argocd.home.arpa
+    tls: false
+    annotations:
+      traefik.ingress.kubernetes.io/router.entrypoints: websecure
+      traefik.ingress.kubernetes.io/router.tls: "true"
+  resources:
+    requests: { cpu: 50m, memory: 128Mi }
+
+controller:
+  resources:
+    requests: { cpu: 100m, memory: 256Mi }
+
+repoServer:
+  resources:
+    requests: { cpu: 50m, memory: 128Mi }
+
+applicationSet:
+  resources:
+    requests: { cpu: 25m, memory: 64Mi }
+
+redis:
+  resources:
+    requests: { cpu: 25m, memory: 64Mi }
+
+# SSO via Dex is a Phase 4 topic.
+dex:
+  enabled: false
+
+notifications:
+  enabled: false
