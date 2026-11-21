@@ -1,0 +1,23 @@
+# Child Application: simple nginx test workload for sync / drift / self-heal practice.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: nginx-test
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: git@github.com:jcaceres/homelab-gitops.git
+    targetRevision: main
+    path: workloads/nginx-test
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: nginx-test
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
